@@ -6,7 +6,10 @@
 
 var friendsData = require("../data/friends.js");
 
-
+// Global Sum Variable
+var sum = [];
+var diff = [];
+var index;
 
 // ===============================================================================
 // ROUTING
@@ -32,12 +35,34 @@ module.exports = function(app) {
   // Then the server saves the data to the friendsData array)
   // ---------------------------------------------------------------------------
 
-  app.post("/api/friends", function(req, res) {
+  app.post("/api/friends", function(req,res) {
     // Note the code here. Our "server" will respond to requests and let users know if they have friends or not.
     // It will do this by sending out the value "true" have friends
    
-      friendsData.push(req.body);
-      res.json(true);
+    // Adding current user score sum to userScoresSum
+    // Inserting Data into friendsData array
+    var temp = 0;
+    userScoresSum = 0;
+    friendsData.push(req.body);
+    for(var i=0; i<req.body.scores.length; i++)
+      userScoresSum += parseInt(req.body.scores[i]);
+
+    // getting friendsData sum in an array
+    for(i=0; i<friendsData.length;i++){
+      for(var j=0; j<friendsData[i].scores.length; j++){
+        temp += parseInt(friendsData[i].scores[j]);
+      }
+      sum[i] = temp;
+      temp = 0;
+    }
+    // Getting difference of Sum array and current user score
+    for(i=0; i<sum.length-1; i++){
+      diff[i] = Math.abs(userScoresSum - sum[i])
+    }
+    // getting the index of best macth in an array
+    index = diff.indexOf(Math.min.apply(Math, diff));
+    res.json(friendsData[index]);
+
     
   });
 
